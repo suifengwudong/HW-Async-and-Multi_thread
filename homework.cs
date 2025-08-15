@@ -53,7 +53,6 @@ public class BookStore
 {
     private readonly Database _db = new Database();
 
-    // TODO: 实现异步购书方法CheckoutAsync，调用 UpdateInventoryAsync
     public async Task CheckoutAsync(string bookTitle, int quantity)
     {
         // 实现异步购书方法，调用 UpdateInventoryAsync
@@ -74,11 +73,11 @@ public class BookStore
         // 使用 Task.WhenAll 模拟多个用户并发购书
         var tasks = new List<Task>
         {
+            CheckoutAsync("C#入门", 2),
             CheckoutAsync("C#入门", 3),
+            CheckoutAsync("异步编程", 1),
             CheckoutAsync("异步编程", 2),
-            CheckoutAsync("C#入门", 5),
-            CheckoutAsync("异步编程", 4),
-            CheckoutAsync("C#入门", 2)
+            CheckoutAsync("异步编程", 3),
         };
         await Task.WhenAll(tasks);
 
