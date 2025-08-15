@@ -30,8 +30,22 @@ public class Database
     {
         await Task.Delay(100); // 模拟网络延迟
 
-        // TODO: 使用 lock 语句保证线程安全
-        // 提示：在 lock 块中查找书籍并更新库存，若库存不足则输出提示
+        lock (_lock)
+        {
+            var book = _books.Find(b => b.Title == title);
+            if (book == null)
+            {
+                Console.WriteLine($"未找到书籍：{title}");
+                return;
+            }
+            if (book.Inventory < quantity)
+            {
+                Console.WriteLine($"库存不足：{title} 仅剩 {book.Inventory} 本");
+                return;
+            }
+            book.Inventory -= quantity;
+            Console.WriteLine($"成功购买 {quantity} 本《{title}》");
+        }
     }
 }
 
@@ -42,6 +56,8 @@ public class BookStore
     // TODO: 实现异步购书方法CheckoutAsync，调用 UpdateInventoryAsync
     public async Task CheckoutAsync(string bookTitle, int quantity)
     {
+        // 实现异步购书方法，调用 UpdateInventoryAsync
+        await _db.UpdateInventoryAsync(bookTitle, quantity);
     }
 
     public async Task SimulateMultipleUsers()
@@ -55,12 +71,16 @@ public class BookStore
 
         Console.WriteLine("\n 开始模拟多用户购书...\n");
 
-        // TODO: 使用 Task.WhenAll 模拟多个用户并发购书
-        // 提示：创建多个 Task 调用 CheckoutAsync，并传入不同书名和数量
+        // 使用 Task.WhenAll 模拟多个用户并发购书
         var tasks = new List<Task>
         {
-            
+            CheckoutAsync("C#入门", 3),
+            CheckoutAsync("异步编程", 2),
+            CheckoutAsync("C#入门", 5),
+            CheckoutAsync("异步编程", 4),
+            CheckoutAsync("C#入门", 2)
         };
+        await Task.WhenAll(tasks);
 
 
         Console.WriteLine("\n购买后库存：");
